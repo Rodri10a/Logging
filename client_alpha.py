@@ -22,3 +22,11 @@ def generate_log():
         "severity": random.choice(SEVERITIES),
         "message": random.choice(MESSAGES)
     }
+    
+headers = {"Authorization": f"Token {TOKEN}"}
+logs = [generate_log() for _ in range(5)]
+
+response = requests.post(URL, json=logs, headers=headers)
+
+print("Status:", response.status_code)
+print("Response:", response.json())
