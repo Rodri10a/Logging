@@ -14,3 +14,11 @@ MESSAGES = [
     "Timeout inesperado.",
     "Usuario no encontrado."
 ]
+
+def generate_log():
+    return {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "service": SERVICE_NAME,
+        "severity": random.choice(SEVERITIES),
+        "message": random.choice(MESSAGES)
+    }
