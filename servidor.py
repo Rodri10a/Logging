@@ -32,3 +32,30 @@ CREATE TABLE IF NOT EXISTS logs (
 )
 """)
 conn.commit()
+
+# Endpoint POST /logs (recibir y guardar logs)
+@app.route("/logs", methods=["POST"])
+def receive_logs():
+    auth = request.headers.get("Authorization", "")
+    token = auth.replace("Token ", "")
+    
+    if not is_token_valid(token):
+        return jsonify({"error": "Quién sos, bro?"}), 401
+
+    logs = request.get_json()
+    if not isinstance(logs, list):
+        logs = [logs]
+
+    now = datetime.now(timezone.utc).isoformat()
+
+    cursor.executemany("""
+        INSERT INTO logs (timestamp, service, severity, message, received_at)
+        VALUES (?, ?, ?, ?, ?)
+    """, [
+        (log.get("timestamp"), log.get("service"),
+         log.get("severity"), log.get("message"), now)
+        for log in logs
+    ])
+    conn.commit()
+
+    return jsonify({"status": "Logs recibidos"}), 201
