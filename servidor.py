@@ -53,9 +53,43 @@ def receive_logs():
         VALUES (?, ?, ?, ?, ?)
     """, [
         (log.get("timestamp"), log.get("service"),
-         log.get("severity"), log.get("message"), now)
+        log.get("severity"), log.get("message"), now)
         for log in logs
     ])
     conn.commit()
 
     return jsonify({"status": "Logs recibidos"}), 201
+
+# Endpoint GET /logs (consulta con filtros)
+@app.route("/logs", methods=["GET"])
+def get_logs():
+    args = request.args
+    query = "SELECT * FROM logs WHERE 1=1"
+    params = []
+
+    if args.get("timestamp_start"):
+        query += " AND timestamp >= ?"
+        params.append(args["timestamp_start"])
+    if args.get("timestamp_end"):
+        query += " AND timestamp <= ?"
+        params.append(args["timestamp_end"])
+    if args.get("severity"):
+        query += " AND severity = ?"
+        params.append(args["severity"])
+    if args.get("received_at_start"):
+        query += " AND received_at >= ?"
+        params.append(args["received_at_start"])
+    if args.get("received_at_end"):
+        query += " AND received_at <= ?"
+        params.append(args["received_at_end"])
+
+    cursor.execute(query, params)
+    rows = cursor.fetchall()
+
+    logs = [{
+        "id": r[0], "timestamp": r[1], "service": r[2],
+        "severity": r[3], "message": r[4], "received_at": r[5]
+    } for r in rows]
+
+    return jsonify(logs), 200
+
