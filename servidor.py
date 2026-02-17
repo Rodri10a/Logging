@@ -93,3 +93,8 @@ def get_logs():
 
     return jsonify(logs), 200
 
+# ------------------------------
+# Ejecuta la app si se corre directamente
+# ------------------------------
+if __name__ == "__main__":
+    app.run(debug=True)
